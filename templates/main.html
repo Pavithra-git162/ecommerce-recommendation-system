@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecommerce Recommendation System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400&family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e8c97a;
+            --gold-dark: #9a7230;
+            --ember: #ee5a24;
+            --cream: #fdf8f2;
+            --ink: #1a1410;
+            --mist: #f5f0e8;
+        }
+
+        @keyframes shine {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes cardReveal {
+            from { opacity: 0; transform: translateY(30px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes toastIn {
+            from { opacity: 0; transform: translateX(100px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes toastOut {
+            from { opacity: 1; transform: translateX(0); }
+            to   { opacity: 0; transform: translateX(100px); }
+        }
+        @keyframes badgeBounce {
+            0%   { transform: scale(1); }
+            50%  { transform: scale(1.4); }
+            100% { transform: scale(1); }
+        }
+
+        html, body { height: 100%; }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .main-content { flex: 1 0 auto; }
+        footer { flex-shrink: 0; }
+
+        /* ── Navbar ── */
+        .navbar { box-shadow: 0px 4px 8px rgba(0,0,0,0.1); }
+        .nav-link:hover { color: orange !important; }
+        .modal-content { background-color: #fff; color: #000; }
+        .card { transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
+
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: 0.5px;
+            background: linear-gradient(90deg, #f5a623, #ff6b6b, #f5a623);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+        }
+        .nav-item .btn-outline-primary {
+            border: 2px solid #f5a623;
+            color: #f5a623 !important;
+            background: transparent;
+            border-radius: 20px;
+            padding: 5px 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-item .btn-outline-primary:hover {
+            background: #f5a623;
+            color: #1a1a1a !important;
+            box-shadow: 0 4px 15px rgba(245,166,35,0.4);
+            transform: translateY(-2px);
+        }
+        .nav-item .btn-primary {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border: none;
+            border-radius: 20px;
+            padding: 5px 18px;
+            color: #fff !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .nav-item .btn-primary:hover {
+            background: linear-gradient(135deg, #ee5a24, #ff6b6b);
+            box-shadow: 0 4px 15px rgba(238,90,36,0.5);
+            transform: translateY(-2px);
+            color: #fff !important;
+        }
+        .btn-logout {
+            border: 2px solid #ee5a24;
+            color: #ee5a24 !important;
+            background: transparent;
+            border-radius: 20px;
+            padding: 5px 18px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-logout:hover {
+            background: #ee5a24;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(238,90,36,0.4);
+            transform: translateY(-2px);
+        }
+        .welcome-badge {
+            background: linear-gradient(135deg, #f5a623, #ee5a24);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* ── Cart Icon ── */
+        .cart-nav-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 5px 14px !important;
+            color: #333 !important;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+        .cart-nav-link:hover { color: #f5a623 !important; }
+        .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: 4px;
+            background: #ee5a24;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        .cart-badge.bounce { animation: badgeBounce 0.4s ease; }
+
+        /* ── Search Section ── */
+        .search-section {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-top: 30px;
+        }
+        .product-image { height: 200px; object-fit: cover; }
+
+        /* ── Section Headings ── */
+        .section-heading {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f5a623, #ff6b6b, #f5a623);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+        }
+        .card-title { font-family: 'Playfair Display', serif; font-weight: 700; }
+
+        /* ── Add to Cart Button ── */
+        .btn-add-cart {
+            background: linear-gradient(135deg, #f5a623, #ee5a24);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 6px;
+            transition: all 0.25s;
+            font-size: 0.85rem;
+        }
+        .btn-add-cart:hover {
+            background: linear-gradient(135deg, #ee5a24, #f5a623);
+            box-shadow: 0 4px 14px rgba(245,166,35,0.45);
+            transform: translateY(-1px);
+            color: #fff;
+        }
+        .btn-add-cart:active { transform: scale(0.97); }
+
+
+        /* ── Toast Notification ── */
+        #cart-toast {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            min-width: 280px;
+            background: #1a1a1a;
+            color: #fff;
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            animation: toastIn 0.35s ease forwards;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        #cart-toast.hide { animation: toastOut 0.35s ease forwards; }
+        #cart-toast .toast-icon { font-size: 1.3rem; color: #28a745; flex-shrink: 0; }
+        #cart-toast .toast-link {
+            margin-left: auto;
+            background: #f5a623;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 4px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            white-space: nowrap;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* ── Collab / You May Also Like ── */
+        .collab-section {
+            background: white;
+            border-radius: 10px;
+            padding: 35px 25px;
+            margin-top: 40px;
+            margin-bottom: 40px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #f5a623;
+        }
+        .collab-heading {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: #1a1a1a;
+        }
+        .collab-subtext { font-size: 0.85rem; color: #777; }
+        .collab-strip {
+            display: flex;
+            gap: 28px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        .collab-strip::-webkit-scrollbar { height: 5px; }
+        .collab-strip::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 5px; }
+        .collab-strip::-webkit-scrollbar-thumb { background: #f5a623; border-radius: 5px; }
+        .collab-card {
+            min-width: 190px;
+            max-width: 190px;
+            background: #fff;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            overflow: hidden;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .collab-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(245,166,35,0.25);
+            border-color: #f5a623;
+        }
+        .collab-card img { width: 100%; height: 150px; object-fit: cover; }
+        .collab-card-body { padding: 12px; }
+        .collab-card-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #222;
+            margin-bottom: 3px;
+        }
+        .collab-card-brand { font-size: 0.75rem; color: #888; }
+        .collab-card-rating { font-size: 0.8rem; color: #f5a623; font-weight: 600; margin-top: 4px; }
+        .collab-card-btn {
+            margin-top: 10px;
+            width: 100%;
+            font-size: 0.8rem;
+            padding: 6px 0;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #f5a623, #ee5a24);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .collab-card-btn:hover {
+            background: linear-gradient(135deg, #ee5a24, #f5a623);
+            box-shadow: 0 4px 12px rgba(245,166,35,0.4);
+        }
+        .star-icon { color: #ffc107; }
+    </style>
+</head>
+<body data-logged-in="{{ 'true' if logged_in else 'false' }}" data-username="{{ username }}">
+
+<!-- ══ Navbar ══ -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <a class="navbar-brand mx-auto" href="#">Ecommerce Recommendation System</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse"
+          data-target="#navbarNav" aria-controls="navbarNav"
+          aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+    <ul class="navbar-nav align-items-center">
+      <li class="nav-item">
+        <a class="nav-link" href="index"><i class="fas fa-home"></i> Home</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" id="settingsLink"><i class="fas fa-cog"></i> Settings</a>
+      </li>
+
+      <!-- 🛒 Cart Icon -->
+      <li class="nav-item">
+        <a class="nav-link cart-nav-link" href="/cart">
+          <i class="fas fa-shopping-cart" style="font-size:1.2rem;"></i>
+          <span class="cart-badge" id="cart-badge-count">{{ cart_count }}</span>
+        </a>
+      </li>
+
+      {% if logged_in %}
+        <li class="nav-item mr-2">
+          <span class="welcome-badge"> {{ username }}</span>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn-logout" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </li>
+      {% else %}
+        <li class="nav-item">
+          <a class="nav-link btn btn-outline-primary mr-2" href="#"
+             data-toggle="modal" data-target="#signupModal">Sign Up</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link btn btn-primary" href="#"
+             data-toggle="modal" data-target="#signinModal">Sign In</a>
+        </li>
+      {% endif %}
+    </ul>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <!-- Search Bar -->
+  <div class="container">
+    <div class="search-section">
+      <h4 class="mb-3 text-center section-heading">What Are You Looking For?</h4>
+      <form action="/recommendations" method="post"
+            style="display:flex; gap:10px; flex-wrap:wrap;">
+        <input type="text" class="form-control" name="prod"
+               placeholder="Search e.g. OPI, shampoo, lipstick..." required
+               style="flex:1; min-width:200px;">
+        <input type="number" class="form-control" name="nbr"
+               placeholder="Count" style="width:100px;" min="1" max="20" value="8">
+        <button class="btn btn-primary px-4">Search</button>
+      </form>
+    </div>
+  </div>
+
+  {% if message %}
+  <div class="container mt-3">
+    <div class="alert alert-warning text-center font-weight-bold">
+      ⚠️ {{ message }}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ══ Recommended Products ══ -->
+  {% if content_based_rec is not none and not content_based_rec.empty %}
+  <div class="container mt-5">
+    <h2 class="text-center mb-2 section-heading">Recommended Products</h2>
+    <p class="text-center mb-4"
+       style="font-size:0.95rem; font-weight:700; letter-spacing:0.6px; color:#ee5a24;">
+      {% if logged_in %}Tailored For You{% else %}Based on product similarity{% endif %}
+    </p>
+
+    <div class="row mt-4">
+      {% for index, product in content_based_rec.iterrows() %}
+      {% set p_price = random_price %}
+      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+        <div class="card h-100 shadow-sm">
+          <img src="{{ product['ImageURL'] }}" class="card-img-top product-image"
+               alt="{{ product['Name'] }}" onerror="this.src='static/img/img_1.png'">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title">{{ truncate(product['Name'], 20) }}</h5>
+            <p class="card-text text-muted mb-1">
+              <strong>Brand:</strong> {{ product['Brand'] if product['Brand'] else 'N/A' }}
+            </p>
+            <p class="card-text mb-1">⭐ {{ product['Rating'] if product['Rating']|float > 0 else 'N/A' }}</p>
+            <p class="card-text mb-2"><strong style="color:#ee5a24;">${{ p_price }}</strong></p>
+            <div class="mt-auto d-flex gap-2" style="gap:8px;">
+              <!-- View Details -->
+              <button type="button" class="btn btn-outline-secondary btn-sm"
+                      data-toggle="modal" data-target="#recModal{{ loop.index0 }}"
+                      style="flex:1; font-size:0.8rem;">
+                Details
+              </button>
+              <!-- Add to Cart -->
+              <button type="button"
+                      class="btn btn-add-cart btn-sm"
+                      style="flex:1;"
+                      onclick="addToCart(this,
+                        '{{ product['Name']|replace("'","\\'")|replace('"','\\"') }}',
+                        '{{ product['Brand'] if product['Brand'] else 'N/A' }}',
+                        '{{ product['ImageURL'] }}',
+                        '{{ product['Rating'] if product['Rating']|float > 0 else 'N/A' }}',
+                        {{ p_price }})">
+                <i class="fas fa-cart-plus"></i> Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Modal -->
+      <div class="modal fade" id="recModal{{ loop.index0 }}" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title">{{ product['Name'] }}</h5>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+              <div class="row">
+                <div class="col-md-5">
+                  <img src="{{ product['ImageURL'] }}" class="img-fluid rounded"
+                       alt="{{ product['Name'] }}" onerror="this.src='static/img/img_1.png'"
+                       style="max-height:180px; object-fit:cover; width:100%;">
+                </div>
+                <div class="col-md-7">
+                  <p><strong>Brand:</strong> {{ product['Brand'] if product['Brand'] else 'N/A' }}</p>
+                  <p><strong>Review Count:</strong>
+                    {% if product['ReviewCount']|float > 0 %}{{ product['ReviewCount']|int }}{% else %}N/A{% endif %}
+                  </p>
+                  <p><strong>Rating:</strong>
+                    {% if product['Rating']|float > 0 %}{{ product['Rating'] }} ⭐{% else %}N/A{% endif %}
+                  </p>
+                  <p><strong>Price:</strong> <span style="color:#ee5a24; font-size:1.1rem;">${{ p_price }}</span></p>
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-add-cart"
+                      onclick="addToCart(this,
+                        '{{ product['Name']|replace("'","\\'")|replace('"','\\"') }}',
+                        '{{ product['Brand'] if product['Brand'] else 'N/A' }}',
+                        '{{ product['ImageURL'] }}',
+                        '{{ product['Rating'] if product['Rating']|float > 0 else 'N/A' }}',
+                        {{ p_price }}); $('#recModal{{ loop.index0 }}').modal('hide');">
+                🛒 Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ══ You May Also Like ══ -->
+  {% if logged_in and collab_rec is not none and not collab_rec.empty %}
+  <div class="container collab-wrapper">
+    <div class="collab-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap mb-3">
+        <div>
+          <h4 class="collab-heading mb-0">You May Also Like</h4>
+          <p class="collab-subtext mt-1 mb-0"
+             style="font-weight:700; letter-spacing:0.5px; color:#ee5a24;">
+            <i class="fas fa-users" style="color:#f5a623;"></i> Top Picks For You
+          </p>
+        </div>
+      </div>
+
+      <div class="collab-strip">
+        {% for index, product in collab_rec.iterrows() %}
+        {% set c_price = random_price %}
+        <div class="collab-card">
+          <img src="{{ product['ImageURL'] }}"
+               alt="{{ product['Name'] }}"
+               onerror="this.src='static/img/img_1.png'">
+          <div class="collab-card-body">
+            <div class="collab-card-name">{{ truncate(product['Name'], 22) }}</div>
+            <div class="collab-card-brand">{{ product['Brand'] if product['Brand'] else 'N/A' }}</div>
+            <div class="collab-card-rating">
+              <i class="fas fa-star star-icon"></i>
+              {% if product['Rating']|float > 0 %}{{ product['Rating'] }}{% else %}N/A{% endif %}
+            </div>
+            <div style="font-size:0.85rem; font-weight:700; color:#ee5a24; margin-top:4px;">${{ c_price }}</div>
+            <button class="collab-card-btn"
+                    onclick="addToCart(this,
+                      '{{ product['Name']|replace("'","\\'")|replace('"','\\"') }}',
+                      '{{ product['Brand'] if product['Brand'] else 'N/A' }}',
+                      '{{ product['ImageURL'] }}',
+                      '{{ product['Rating'] if product['Rating']|float > 0 else 'N/A' }}',
+                      {{ c_price }})">
+              <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% endif %}
+
+</div><!-- End Main Content -->
+
+<!-- ══ Cart Toast ══ -->
+<div id="cart-toast" style="display:none;">
+  <span class="toast-icon"><i class="fas fa-check-circle"></i></span>
+  <span id="cart-toast-msg">Added to cart!</span>
+  <a href="/cart" class="toast-link">View Cart →</a>
+</div>
+
+<!-- Sign Up Modal -->
+<div class="modal fade" id="signupModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sign Up</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <form action="/signup" method="post">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" name="username" required>
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign Up</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Sign In Modal -->
+<div class="modal fade" id="signinModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sign In</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <form action="/signin" method="post">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" class="form-control" name="signinUsername" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" class="form-control" name="signinPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Sign In</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings Modal -->
+<div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Settings</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+      </div>
+      <div class="modal-body">
+        <h5>Choose Theme:</h5>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="theme" id="defaultTheme" value="default" checked>
+          <label class="form-check-label" for="defaultTheme">Default</label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="theme" id="blackTheme" value="black">
+          <label class="form-check-label" for="blackTheme">Black</label>
+        </div>
+        <hr>
+        <h5>Zoom:</h5>
+        <button type="button" class="btn btn-primary mr-2" id="zoomIn">Zoom In</button>
+        <button type="button" class="btn btn-primary" id="zoomOut">Zoom Out</button>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="applyTheme">Apply</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer bg-dark text-white">
+    <div class="container" style="padding-top:20px;">
+        <div class="row">
+            <div class="col-md-3 col-sm-6">
+                <h5>About Us</h5>
+                <p>Your go-to platform for smart, personalized product recommendations — powered by AI.</p>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h5>Links</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#">Services</a></li>
+                    <li><a href="#">Contact</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h5>Support</h5>
+                <ul class="list-unstyled">
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <h5>Contact Us</h5>
+                <i class="fas fa-phone"></i> Phone: +1234567890<br>
+                <i class="fas fa-envelope"></i> Email: info@example.com
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <hr class="bg-light">
+                <p class="text-center">© Ecommerce Recommendation System. All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  // ── Settings ──
+  document.getElementById('settingsLink').addEventListener('click', function() {
+    $('#settingsModal').modal('show');
+  });
+  document.getElementById('applyTheme').addEventListener('click', function() {
+    var theme = document.querySelector('input[name="theme"]:checked').value;
+    if (theme === 'black') {
+      document.body.style.backgroundColor = '#212121';
+      document.body.style.color = '#ececec';
+      document.querySelector('.navbar').style.backgroundColor = '#2a2a2a';
+      document.querySelectorAll('.card').forEach(el => {
+        el.style.backgroundColor = '#2a2a2a';
+        el.style.borderColor = '#3a3a3a';
+        el.style.color = '#ececec';
+      });
+      document.querySelectorAll('.search-section, .collab-section').forEach(el => {
+        el.style.backgroundColor = '#1e1e1e';
+        el.style.borderColor = '#3a3a3a';
+      });
+      document.querySelectorAll('.collab-card').forEach(el => {
+        el.style.backgroundColor = '#2a2a2a';
+        el.style.borderColor = '#3a3a3a';
+      });
+      document.querySelectorAll('.collab-card-name').forEach(el => el.style.color = '#ececec');
+      document.querySelectorAll('.form-control').forEach(el => {
+        el.style.backgroundColor = '#333';
+        el.style.borderColor = '#444';
+        el.style.color = '#ececec';
+      });
+      document.querySelectorAll('label, h1, h2, h3, h4, h5, h6').forEach(el => el.style.color = '#ececec');
+    } else {
+      document.body.style.backgroundColor = '#f8f9fa';
+      document.body.style.color = '#000';
+      document.querySelector('.navbar').style.backgroundColor = '';
+      document.querySelectorAll('.card, .collab-card, .search-section, .collab-section').forEach(el => {
+        el.style.backgroundColor = '';
+        el.style.borderColor = '';
+        el.style.color = '';
+      });
+      document.querySelectorAll('.collab-card-name').forEach(el => el.style.color = '');
+      document.querySelectorAll('.form-control').forEach(el => {
+        el.style.backgroundColor = '';
+        el.style.borderColor = '';
+        el.style.color = '';
+      });
+      document.querySelectorAll('label, h1, h2, h3, h4, h5, h6').forEach(el => el.style.color = '');
+    }
+    $('#settingsModal').modal('hide');
+  });
+  document.getElementById('zoomIn').addEventListener('click', function() {
+    document.body.style.zoom = "115%";
+  });
+  document.getElementById('zoomOut').addEventListener('click', function() {
+    document.body.style.zoom = "100%";
+  });
+
+  // ── Cart: Add to Cart ──
+  let toastTimer = null;
+
+  function addToCart(btn, name, brand, image, rating, price) {
+    fetch('/add_to_cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, brand, image, rating, price })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (data.success) {
+        // Update badge
+        updateBadge(data.cart_count);
+        // Button feedback
+        btn.classList.add('added');
+        btn.innerHTML = '<i class="fas fa-check"></i> Added!';
+        setTimeout(() => {
+          btn.classList.remove('added');
+          btn.innerHTML = '<i class="fas fa-cart-plus"></i> Add';
+        }, 1800);
+        // Show toast
+        showToast(data.message);
+      }
+    });
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('cart-badge-count');
+    if (!badge) return;
+    badge.textContent = count;
+    badge.classList.remove('bounce');
+    void badge.offsetWidth; // reflow to restart animation
+    badge.classList.add('bounce');
+  }
+
+  function showToast(msg) {
+    const toast = document.getElementById('cart-toast');
+    document.getElementById('cart-toast-msg').textContent = msg;
+    toast.style.display = 'flex';
+    toast.classList.remove('hide');
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      toast.classList.add('hide');
+      setTimeout(() => { toast.style.display = 'none'; }, 350);
+    }, 3000);
+  }
+</script>
+<!-- ═══════════════════════════ SHOPBOT WIDGET — paste before </body> ═══════════════════════════ -->
+<style>
+@keyframes botFadeIn  { from{opacity:0;transform:translateY(16px) scale(.97)} to{opacity:1;transform:translateY(0) scale(1)} }
+@keyframes bubblePop  { 0%{transform:scale(.85);opacity:0} 60%{transform:scale(1.06)} 100%{transform:scale(1);opacity:1} }
+@keyframes typingDot  { 0%,80%,100%{transform:scale(0);opacity:.3} 40%{transform:scale(1);opacity:1} }
+@keyframes pulseRing  { 0%{box-shadow:0 0 0 0 rgba(245,166,35,.55)} 70%{box-shadow:0 0 0 12px rgba(245,166,35,0)} 100%{box-shadow:0 0 0 0 rgba(245,166,35,0)} }
+@keyframes slideUp    { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+
+/* FAB */
+#chat-fab{position:fixed;bottom:28px;right:28px;z-index:9000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#f5a623,#ee5a24);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(238,90,36,.45);animation:pulseRing 2.5s infinite;transition:transform .2s,box-shadow .2s}
+#chat-fab:hover{transform:scale(1.1);box-shadow:0 8px 28px rgba(238,90,36,.6);animation:none}
+#chat-fab svg{width:28px;height:28px;fill:#fff}
+#chat-fab .fab-close{display:none}
+#chat-fab.open .fab-open{display:none}
+#chat-fab.open .fab-close{display:block}
+#chat-unread-dot{position:absolute;top:3px;right:3px;width:13px;height:13px;background:#28a745;border:2px solid #fff;border-radius:50%}
+
+/* Window */
+#chat-window{position:fixed;bottom:100px;right:28px;z-index:8999;width:390px;max-height:600px;background:#fff;border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.18);display:flex;flex-direction:column;font-family:'DM Sans',sans-serif}
+#chat-window.hidden{display:none}
+
+/* Header */
+.ch{background:linear-gradient(135deg,#f5a623,#ee5a24);padding:14px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0;border-radius:18px 18px 0 0}
+.ch-av{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.ch-info{flex:1}
+.ch-name{font-weight:700;font-size:.95rem;color:#fff;font-family:'Playfair Display',serif}
+.ch-status{font-size:.72rem;color:rgba(255,255,255,.85);display:flex;align-items:center;gap:4px}
+.ch-status::before{content:'';width:7px;height:7px;background:#7fff7f;border-radius:50%;display:inline-block}
+.ch-close{background:rgba(255,255,255,.2);border:none;color:#fff;width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:background .2s;flex-shrink:0}
+.ch-close:hover{background:rgba(255,255,255,.35)}
+
+/* Messages — scrolls vertically, clips nothing horizontally for product row */
+#chat-msgs{flex:1;overflow-y:auto;overflow-x:hidden;padding:14px 12px;display:flex;flex-direction:column;gap:10px;background:#f8f9fb;min-height:0}
+#chat-msgs::-webkit-scrollbar{width:4px}
+#chat-msgs::-webkit-scrollbar-thumb{background:#ddd;border-radius:4px}
+
+/* Bubbles */
+.bw{display:flex;align-items:flex-end;gap:8px;animation:bubblePop .25s ease forwards;flex-shrink:0}
+.bw.u{flex-direction:row-reverse}
+.bav{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#f5a623,#ee5a24);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;line-height:1}
+.bb{max-width:76%;padding:10px 14px;border-radius:16px;font-size:.85rem;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.bb.bot{background:#fff;color:#1a1a1a;border-bottom-left-radius:4px;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.bb.usr{background:linear-gradient(135deg,#f5a623,#ee5a24);color:#fff;border-bottom-right-radius:4px}
+.bb strong{font-weight:700}
+
+/* Typing */
+.typing-ind{display:flex;align-items:center;gap:5px;padding:10px 14px;background:#fff;border-radius:16px;border-bottom-left-radius:4px;width:fit-content;box-shadow:0 2px 8px rgba(0,0,0,.07)}
+.tdot{width:7px;height:7px;background:#f5a623;border-radius:50%;animation:typingDot 1.2s infinite ease-in-out}
+.tdot:nth-child(2){animation-delay:.2s}
+.tdot:nth-child(3){animation-delay:.4s}
+
+/* ── Product row ──
+   KEY: negative margin bleeds past #chat-msgs padding
+   so the horizontal scroll track goes full width          */
+.prod-row{
+  display:flex;
+  gap:10px;
+  overflow-x:auto;
+  overflow-y:visible;
+  margin-left:-12px;
+  margin-right:-12px;
+  padding:6px 12px 12px;
+  flex-shrink:0;
+  min-height:240px;        /* guarantees cards are always tall enough to see */
+  animation:slideUp .3s ease forwards;
+  -webkit-overflow-scrolling:touch;
+}
+.prod-row::-webkit-scrollbar{height:5px}
+.prod-row::-webkit-scrollbar-track{background:#f0f0f0;border-radius:5px}
+.prod-row::-webkit-scrollbar-thumb{background:#f5a623;border-radius:5px}
+
+/* Card */
+.pc{
+  min-width:148px;max-width:148px;flex-shrink:0;
+  background:#fff;border-radius:12px;
+  border:1.5px solid #eee;
+  box-shadow:0 3px 12px rgba(0,0,0,.09);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+  transition:transform .2s,box-shadow .2s,border-color .2s;
+}
+.pc:hover{transform:translateY(-4px);box-shadow:0 8px 20px rgba(245,166,35,.3);border-color:#f5a623}
+
+/* Image box — FIXED HEIGHT always visible */
+.pc-img{
+  width:100%;
+  height:112px;           /* explicit height — never collapses */
+  flex-shrink:0;
+  background:#f0f0f0;
+  overflow:hidden;
+  position:relative;
+  display:flex;align-items:center;justify-content:center;
+}
+.pc-img img{width:100%;height:100%;object-fit:cover;display:block}
+.pc-img .no-img{
+  display:none;position:absolute;inset:0;
+  flex-direction:column;align-items:center;justify-content:center;
+  gap:4px;color:#bbb;font-size:.7rem;text-align:center;
+  background:linear-gradient(135deg,#f9f9f9,#efefef);
+}
+.pc-img .no-img span{font-size:1.8rem;line-height:1}
+
+/* Card body */
+.pc-body{padding:9px 10px 10px;display:flex;flex-direction:column;flex:1}
+.pc-name{font-weight:700;color:#1a1a1a;font-size:.79rem;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Playfair Display',serif}
+.pc-brand{color:#aaa;font-size:.69rem;margin-bottom:2px}
+.pc-rating{color:#f5a623;font-size:.72rem;font-weight:600;margin-bottom:2px}
+.pc-price{color:#ee5a24;font-weight:700;font-size:.86rem;margin-top:auto;padding-top:4px}
+.pc-btn{margin-top:7px;width:100%;padding:6px 0;font-size:.73rem;font-weight:700;border:none;border-radius:7px;background:linear-gradient(135deg,#f5a623,#ee5a24);color:#fff;cursor:pointer;transition:opacity .2s,transform .15s}
+.pc-btn:hover{opacity:.88;transform:scale(1.02)}
+.pc-btn:disabled{background:linear-gradient(135deg,#28a745,#20c997);cursor:default;transform:none;opacity:1}
+
+/* Input */
+.ci-area{border-top:1px solid #f0f0f0;padding:10px 12px;display:flex;gap:8px;align-items:center;background:#fff;flex-shrink:0;border-radius:0 0 18px 18px}
+#ci{flex:1;border:1.5px solid #e0e0e0;border-radius:22px;padding:9px 16px;font-size:.85rem;outline:none;transition:border-color .2s;font-family:'DM Sans',sans-serif;background:#f8f9fb}
+#ci:focus{border-color:#f5a623;background:#fff}
+#ci-btn{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#f5a623,#ee5a24);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .15s,box-shadow .15s}
+#ci-btn:hover{transform:scale(1.1);box-shadow:0 4px 12px rgba(238,90,36,.4)}
+#ci-btn svg{width:17px;height:17px;fill:#fff}
+
+@media(max-width:480px){
+  #chat-window{width:calc(100vw - 24px);right:12px;bottom:90px;max-height:72vh}
+  #chat-fab{bottom:18px;right:18px}
+}
+</style>
+
+<!-- FAB button -->
+<button id="chat-fab" onclick="toggleChat()" title="ShopBot">
+  <span id="chat-unread-dot"></span>
+  <svg class="fab-open" viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 00-2 2v18l4-4h14a2 2 0 002-2V4a2 2 0 00-2-2zm-2 10H6V10h12v2zm0-3H6V7h12v2z"/></svg>
+  <svg class="fab-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+</button>
+
+<!-- Chat window -->
+<div id="chat-window" class="hidden">
+  <div class="ch">
+    <div class="ch-av">🛍️</div>
+    <div class="ch-info">
+      <div class="ch-name">ShopBot Assistant</div>
+      <div class="ch-status">Online</div>
+    </div>
+    <button class="ch-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div id="chat-msgs"></div>
+  <div class="ci-area">
+    <input id="ci" type="text" placeholder="Ask me anything..."
+           onkeydown="if(event.key==='Enter')sendMsg()"/>
+    <button id="ci-btn" onclick="sendMsg()">
+      <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var open=false, busy=false;
+
+  /* ── Toggle ── */
+  window.toggleChat=function(){
+    open=!open;
+    var w=document.getElementById('chat-window');
+    var f=document.getElementById('chat-fab');
+    var d=document.getElementById('chat-unread-dot');
+    if(open){
+      w.classList.remove('hidden'); f.classList.add('open');
+      if(d) d.style.display='none';
+      if(!document.getElementById('chat-msgs').hasChildNodes()) setTimeout(welcome,320);
+      setTimeout(function(){document.getElementById('ci').focus();},400);
+    } else {
+      w.classList.add('hidden'); f.classList.remove('open');
+    }
+  };
+
+  /* ── Welcome ── */
+  function welcome(){
+    var u=(document.body.dataset.username||'').trim();
+    botMsg(u?'Hey '+u+'! 👋 What are you shopping for?':'Hey! 👋 What are you looking for today?');
+  }
+
+  /* ── Send ── */
+  window.sendMsg=function(txt){
+    var inp=document.getElementById('ci');
+    var msg=(txt!==undefined?txt:inp.value).trim();
+    if(!msg||busy) return;
+    inp.value='';
+    userMsg(msg);
+    showTyping();
+
+    setTimeout(function(){
+      fetch('/chat',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({message:msg})
+      })
+      .then(function(r){return r.json();})
+      .then(function(d){
+        hideTyping();
+        if(d.reply) botMsg(d.reply);
+        if(d.products && d.products.length>0) showProducts(d.products);
+      })
+      .catch(function(){
+        hideTyping();
+        botMsg('Connection error — please try again.');
+      });
+    }, 400+Math.random()*300);
+  };
+
+  /* ── User bubble ── */
+  function userMsg(text){
+    var m=document.getElementById('chat-msgs');
+    var w=document.createElement('div'); w.className='bw u';
+    var av=document.createElement('div'); av.className='bav'; av.textContent='👤';
+    var b=document.createElement('div'); b.className='bb usr'; b.textContent=text;
+    w.appendChild(b); w.appendChild(av);
+    m.appendChild(w); scrollBot();
+  }
+
+  /* ── Bot bubble ── */
+  function botMsg(text){
+    var m=document.getElementById('chat-msgs');
+    var w=document.createElement('div'); w.className='bw';
+    var av=document.createElement('div'); av.className='bav'; av.textContent='🛍️';
+    var b=document.createElement('div'); b.className='bb bot';
+    b.innerHTML=esc(text).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+    w.appendChild(av); w.appendChild(b);
+    m.appendChild(w); scrollBot();
+  }
+
+  /* ── Product cards ── */
+  function showProducts(products){
+    var m=document.getElementById('chat-msgs');
+    var row=document.createElement('div');
+    row.className='prod-row';
+
+    products.forEach(function(p){
+      var card=document.createElement('div'); card.className='pc';
+
+      /* image */
+      var iw=document.createElement('div'); iw.className='pc-img';
+      var img=document.createElement('img');
+      img.alt=p.name||'Product'; img.loading='lazy';
+
+      /* resolve src */
+      var src=String(p.image||'').trim();
+      if(src.startsWith('http://')||src.startsWith('https://')){
+        img.src=src;
+      } else if(src.startsWith('/static/')){
+        img.src=src;
+      } else if(src.startsWith('static/')){
+        img.src='/'+src;
+      } else {
+        img.src='https://placehold.co/296x224/f5a623/ffffff?text='+
+                encodeURIComponent((p.name||'Product').slice(0,14));
+      }
+
+      var ni=document.createElement('div'); ni.className='no-img';
+      ni.innerHTML='<span>🛒</span><br>No image';
+      img.onerror=function(){img.style.display='none'; ni.style.display='flex';};
+      iw.appendChild(img); iw.appendChild(ni); card.appendChild(iw);
+
+      /* body */
+      var bd=document.createElement('div'); bd.className='pc-body';
+
+      var nm=document.createElement('div'); nm.className='pc-name';
+      nm.title=p.name||''; nm.textContent=trunc(p.name||'Product',22);
+
+      var br=document.createElement('div'); br.className='pc-brand';
+      br.textContent=p.brand||'N/A';
+
+      var pr=document.createElement('div'); pr.className='pc-price';
+      pr.textContent='$'+(p.price||'');
+
+      bd.appendChild(nm); bd.appendChild(br);
+
+      if(p.rating && p.rating!=='N/A'){
+        var rt=document.createElement('div'); rt.className='pc-rating';
+        rt.textContent='\u2605 '+p.rating; bd.appendChild(rt);
+      }
+      bd.appendChild(pr);
+
+      var btn=document.createElement('button'); btn.className='pc-btn';
+      btn.textContent='Add to Cart';
+      (function(b,prod){ b.onclick=function(){addCart(b,prod);}; }(btn,p));
+      bd.appendChild(btn);
+
+      card.appendChild(bd);
+      row.appendChild(card);
+    });
+
+    m.appendChild(row); scrollBot();
+  }
+
+  /* ── Typing ── */
+  function showTyping(){
+    busy=true;
+    var m=document.getElementById('chat-msgs');
+    var w=document.createElement('div'); w.id='tw'; w.className='bw';
+    var av=document.createElement('div'); av.className='bav'; av.textContent='🛍️';
+    var ind=document.createElement('div'); ind.className='typing-ind';
+    ind.innerHTML='<div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>';
+    w.appendChild(av); w.appendChild(ind);
+    m.appendChild(w); scrollBot();
+  }
+  function hideTyping(){
+    busy=false;
+    var el=document.getElementById('tw'); if(el) el.remove();
+  }
+
+  /* ── Add to cart ── */
+  window.addCart=function(btn,product){
+    fetch('/add_to_cart',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({name:product.name,brand:product.brand,
+                           image:product.image,rating:product.rating,price:product.price})
+    })
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.success){
+        btn.textContent='✓ Added!'; btn.disabled=true;
+        var badge=document.getElementById('cart-badge-count');
+        if(badge){
+          badge.textContent=d.cart_count;
+          badge.classList.remove('bounce'); void badge.offsetWidth; badge.classList.add('bounce');
+        }
+        if(typeof showToast==='function') showToast(d.message);
+      }
+    }).catch(function(){});
+  };
+
+  /* ── Utils ── */
+  function scrollBot(){
+    var m=document.getElementById('chat-msgs');
+    setTimeout(function(){m.scrollTop=m.scrollHeight;},80);
+  }
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function trunc(s,n){ s=String(s); return s.length>n?s.slice(0,n)+'...':s; }
+}());
+</script>
+<!-- ══════════════════════════════════════════════════ END SHOPBOT ══ -->
+</body>
+</html>

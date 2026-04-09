@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Cart — Ecommerce</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        @keyframes shine {
+            0%   { background-position: 0% center; }
+            100% { background-position: 200% center; }
+        }
+        body {
+            background: #f0f2f5;
+            font-family: 'DM Sans', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content { flex: 1; }
+
+        /* Navbar */
+        .navbar { box-shadow: 0 2px 8px rgba(0,0,0,0.1); background: #fff !important; }
+        .navbar-brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.3rem;
+            background: linear-gradient(90deg, #f5a623, #ff6b6b, #f5a623);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shine 3s linear infinite;
+        }
+        .cart-nav-link {
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 5px 14px !important;
+            font-weight: 600;
+        }
+        .cart-badge {
+            position: absolute;
+            top: -4px;
+            right: 4px;
+            background: #ee5a24;
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+        }
+        .btn-logout {
+            border: 2px solid #ee5a24;
+            color: #ee5a24 !important;
+            background: transparent;
+            border-radius: 20px;
+            padding: 5px 18px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-logout:hover { background: #ee5a24; color: #fff !important; }
+        .welcome-badge {
+            background: linear-gradient(135deg, #f5a623, #ee5a24);
+            color: #fff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        /* Page Title */
+        .page-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            border-bottom: 3px solid #f5a623;
+            padding-bottom: 10px;
+            margin-bottom: 24px;
+        }
+
+        /* Cart Row Card */
+        .cart-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 20px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: box-shadow 0.2s;
+        }
+        .cart-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+        .cart-img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid #eee;
+            flex-shrink: 0;
+        }
+        .cart-item-info { flex: 1; min-width: 0; }
+        .cart-item-name {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .cart-item-brand { font-size: 0.82rem; color: #888; margin-bottom: 4px; }
+        .cart-item-rating { font-size: 0.82rem; color: #f5a623; }
+        .cart-item-price {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #ee5a24;
+            white-space: nowrap;
+        }
+        .cart-item-subtotal {
+            font-size: 0.82rem;
+            color: #777;
+            margin-top: 2px;
+        }
+
+        /* Quantity Controls */
+        .qty-controls {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            width: fit-content;
+        }
+        .qty-btn {
+            background: #f8f9fa;
+            border: none;
+            width: 34px;
+            height: 34px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #333;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qty-btn:hover { background: #f5a623; color: #fff; }
+        .qty-num {
+            width: 38px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            border-left: 1px solid #ddd;
+            border-right: 1px solid #ddd;
+            background: #fff;
+            pointer-events: none;
+            height: 34px;
+            line-height: 34px;
+        }
+
+        /* Remove Button */
+        .btn-remove {
+            background: none;
+            border: none;
+            color: #ccc;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: color 0.2s, background 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-remove:hover { color: #ee5a24; background: #fff0eb; }
+
+        /* Order Summary */
+        .summary-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            padding: 24px;
+            position: sticky;
+            top: 80px;
+        }
+        .summary-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 18px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 10px;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.92rem;
+            margin-bottom: 10px;
+            color: #444;
+        }
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            border-top: 2px solid #f0f0f0;
+            padding-top: 14px;
+            margin-top: 8px;
+        }
+        .btn-checkout {
+            width: 100%;
+            background: linear-gradient(135deg, #f5a623, #ee5a24);
+            border: none;
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            cursor: pointer;
+            transition: all 0.25s;
+            letter-spacing: 0.3px;
+        }
+        .btn-checkout:hover {
+            background: linear-gradient(135deg, #ee5a24, #f5a623);
+            box-shadow: 0 6px 18px rgba(238,90,36,0.4);
+            transform: translateY(-1px);
+        }
+        .btn-continue {
+            width: 100%;
+            background: #fff;
+            border: 2px solid #f5a623;
+            color: #f5a623;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            transition: all 0.25s;
+            text-align: center;
+            display: block;
+            text-decoration: none;
+        }
+        .btn-continue:hover {
+            background: #f5a623;
+            color: #fff;
+            text-decoration: none;
+        }
+
+        /* Empty Cart */
+        .empty-cart {
+            text-align: center;
+            padding: 80px 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .empty-cart i { font-size: 5rem; color: #ddd; margin-bottom: 20px; }
+        .empty-cart h4 { font-family: 'Playfair Display', serif; color: #555; margin-bottom: 10px; }
+        .empty-cart p { color: #999; margin-bottom: 24px; }
+
+        /* Savings badge */
+        .savings-badge {
+            background: #e6f9ec;
+            color: #28a745;
+            font-size: 0.78rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-light bg-white">
+  <a class="navbar-brand mx-3" href="/">Ecommerce Recommendation System</a>
+  <div class="ml-auto d-flex align-items-center mr-3" style="gap:12px;">
+    <a class="nav-link cart-nav-link" href="/cart" style="color:#333;">
+      <i class="fas fa-shopping-cart" style="font-size:1.2rem;"></i>
+      <span class="cart-badge" id="cart-badge-count">{{ cart_count }}</span>
+    </a>
+    {% if logged_in %}
+      <span class="welcome-badge">{{ username }}</span>
+      <a class="btn-logout nav-link" href="/logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
+    {% endif %}
+    <a href="/main" class="btn btn-sm btn-outline-secondary" style="border-radius:20px;">← Back</a>
+  </div>
+</nav>
+
+<div class="main-content">
+  <div class="container py-4">
+
+    <h2 class="page-title">
+      <i class="fas fa-shopping-cart" style="color:#f5a623; margin-right:10px;"></i>
+      Shopping Cart
+      {% if cart %}
+        <small style="font-size:0.9rem; font-weight:500; color:#888; font-family:'DM Sans',sans-serif;">
+          ({{ cart|length }} item{{ 's' if cart|length != 1 else '' }})
+        </small>
+      {% endif %}
+    </h2>
+
+    {% if cart %}
+    <div class="row">
+
+      <!-- Left: Cart Items -->
+      <div class="col-lg-8">
+        {% for item in cart %}
+        <div class="cart-card" id="cart-row-{{ loop.index0 }}">
+          <img src="{{ item['image'] }}" class="cart-img"
+               alt="{{ item['name'] }}" onerror="this.src='static/img/img_1.png'">
+
+          <div class="cart-item-info">
+            <div class="cart-item-name" title="{{ item['name'] }}">{{ item['name'] }}</div>
+            <div class="cart-item-brand">Brand: {{ item['brand'] }}</div>
+            <div class="cart-item-rating">
+              <i class="fas fa-star"></i>
+              {{ item['rating'] if item['rating'] != 'N/A' else 'N/A' }}
+            </div>
+          </div>
+
+          <!-- Qty Controls -->
+          <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+            <div class="qty-controls">
+              <button class="qty-btn"
+                      onclick="updateQty('{{ item['name']|replace("'","\\'")|replace('"','\\"') }}', 'decrease', {{ loop.index0 }})">
+                −
+              </button>
+              <div class="qty-num" id="qty-{{ loop.index0 }}">{{ item['quantity'] }}</div>
+              <button class="qty-btn"
+                      onclick="updateQty('{{ item['name']|replace("'","\\'")|replace('"','\\"') }}', 'increase', {{ loop.index0 }})">
+                +
+              </button>
+            </div>
+            <div class="cart-item-subtotal" id="subtotal-{{ loop.index0 }}">
+              ${{ "%.2f"|format(item['price'] * item['quantity']) }}
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div style="text-align:right; min-width:70px;">
+            <div class="cart-item-price">${{ "%.2f"|format(item['price']) }}</div>
+            <div style="font-size:0.75rem; color:#aaa;">each</div>
+          </div>
+
+          <!-- Remove -->
+          <button class="btn-remove"
+                  title="Remove"
+                  onclick="removeItem('{{ item['name']|replace("'","\\'")|replace('"','\\"') }}', {{ loop.index0 }})">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Right: Order Summary -->
+      <div class="col-lg-4">
+        <div class="summary-card">
+          <div class="summary-title">Order Summary</div>
+
+          <div class="summary-row">
+            <span>Items ({{ cart|length }})</span>
+            <span id="summary-items">{{ cart|length }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span id="summary-subtotal">${{ "%.2f"|format(total) }}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span style="color:#28a745; font-weight:600;">FREE</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax (8%)</span>
+            <span id="summary-tax">${{ "%.2f"|format(total * 0.08) }}</span>
+          </div>
+
+          <div class="summary-total">
+            <span>Total</span>
+            <span id="summary-total">${{ "%.2f"|format(total * 1.08) }}</span>
+          </div>
+
+          <button class="btn-checkout" onclick="window.location.href='/payment'">
+            <i class="fas fa-lock" style="margin-right:6px;"></i> Proceed to Checkout
+          </button>
+          <a href="/main" class="btn-continue">← Continue Shopping</a>
+
+          <p style="font-size:0.75rem; color:#aaa; text-align:center; margin-top:14px;">
+            <i class="fas fa-shield-alt" style="color:#28a745;"></i>
+            Secure checkout &nbsp;|&nbsp; Free returns
+          </p>
+        </div>
+      </div>
+
+    </div><!-- .row -->
+
+    {% else %}
+    <!-- Empty Cart -->
+    <div class="empty-cart">
+      <i class="fas fa-shopping-cart"></i>
+      <h4>Your cart is empty</h4>
+      <p>Looks like you haven't added anything yet. Discover products you'll love!</p>
+      <a href="/main" class="btn btn-lg"
+         style="background:linear-gradient(135deg,#f5a623,#ee5a24); color:#fff; border-radius:8px; font-weight:600; padding:12px 36px;">
+        Start Shopping
+      </a>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-dark text-white py-3 mt-4">
+  <p class="text-center mb-0" style="font-size:0.85rem;">
+    © Ecommerce Recommendation System. All Rights Reserved.
+  </p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+  function updateQty(name, action, rowIdx) {
+    fetch('/update_cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, action })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) return;
+
+      // Update badge
+      document.getElementById('cart-badge-count').textContent = data.cart_count;
+
+      // If qty dropped to 0, remove the row
+      if (data.cart_count === 0 || action === 'decrease') {
+        // Re-fetch current qty from DOM
+        const qtyEl = document.getElementById('qty-' + rowIdx);
+        if (qtyEl) {
+          let cur = parseInt(qtyEl.textContent);
+          if (action === 'decrease') cur--;
+          if (cur <= 0) {
+            // Remove row
+            const row = document.getElementById('cart-row-' + rowIdx);
+            if (row) row.remove();
+            if (data.cart_count === 0) location.reload();
+          } else {
+            qtyEl.textContent = cur;
+            // Update subtotal for this row
+            // We need price — store it as data attr
+            updateSubtotal(rowIdx, cur);
+          }
+        }
+      } else {
+        const qtyEl = document.getElementById('qty-' + rowIdx);
+        if (qtyEl) {
+          let cur = parseInt(qtyEl.textContent) + 1;
+          qtyEl.textContent = cur;
+          updateSubtotal(rowIdx, cur);
+        }
+      }
+
+      // Update summary totals
+      document.getElementById('summary-subtotal').textContent = '$' + data.total.toFixed(2);
+      document.getElementById('summary-tax').textContent = '$' + (data.total * 0.08).toFixed(2);
+      document.getElementById('summary-total').textContent = '$' + (data.total * 1.08).toFixed(2);
+    });
+  }
+
+  function updateSubtotal(rowIdx, newQty) {
+    // We'll just reload to keep it simple and accurate
+    location.reload();
+  }
+
+  function removeItem(name, rowIdx) {
+    fetch('/remove_from_cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    })
+    .then(r => r.json())
+    .then(data => {
+      if (!data.success) return;
+      // Remove the row
+      const row = document.getElementById('cart-row-' + rowIdx);
+      if (row) {
+        row.style.transition = 'opacity 0.3s, transform 0.3s';
+        row.style.opacity = '0';
+        row.style.transform = 'translateX(40px)';
+        setTimeout(() => {
+          row.remove();
+          // If empty, reload to show empty state
+          if (data.cart_count === 0) location.reload();
+        }, 300);
+      }
+      document.getElementById('cart-badge-count').textContent = data.cart_count;
+      document.getElementById('summary-subtotal').textContent = '$' + data.total.toFixed(2);
+      document.getElementById('summary-tax').textContent = '$' + (data.total * 0.08).toFixed(2);
+      document.getElementById('summary-total').textContent = '$' + (data.total * 1.08).toFixed(2);
+    });
+  }
+</script>
+</body>
+</html>
